@@ -66,7 +66,7 @@ int main(int argc, char** argv)
             springs.push_back(KOL_sim::Spring(&masses[i], &masses[j], 100'000));
 
     sim.simulate(springs, masses, argc, argv); //outputs position into a file.
-    sim.start();
+    sim.start(argc, argv);
     return 0;
 
 }
