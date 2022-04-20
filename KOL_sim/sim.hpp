@@ -27,7 +27,7 @@ namespace KOL_sim {
 
 
 Camera camera;
-Graphics drawings = Graphics(camera);
+Graphics drawings = Graphics(&camera);
 int loop = 0;
 int  iter = 0;
 Checkerboard checkerboard;
