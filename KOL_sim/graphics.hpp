@@ -93,7 +93,7 @@ class Graphics {
     friend class Mass;
     friend class Spring;
 public:
-    Graphics(Camera cam);
+    Graphics(Camera* cam);
     // Application-specific initialization: Set up global lighting parameters
     // and create display lists.
     void init(Checkerboard &checkerboard);
