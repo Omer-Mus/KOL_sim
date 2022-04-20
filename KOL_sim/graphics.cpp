@@ -88,9 +88,9 @@ void Checkerboard::draw() {
 
 Camera* Graphics::camera;
 
-Graphics::Graphics(Camera cam) {
+Graphics::Graphics(Camera *cam) {
 
-    camera = &cam;
+    camera = cam;
 }
 
 void Graphics::init(Checkerboard &checkerboard) {
