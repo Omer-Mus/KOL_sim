@@ -9,8 +9,8 @@
 
 
 //std::vector<double> GRAVITY = {0,0,-9.81};
-static const double DT = 0.0005;
-double T = 7;
+static const double DT = 0.0005; //time step
+double T = 14; //total time of simulation
 GLfloat WHITE[] = {1, 1, 1};
 GLfloat RED[] = {1, 0, 0};
 GLfloat GREEN[] = {0, 1, 0};
@@ -18,55 +18,86 @@ GLfloat MAGENTA[] = {1, 0, 1};
 GLfloat BLACK[] = {0, 0, 0};
 
 
+namespace ObjectExamples {
+
+    void makeLattice(std::vector<KOL_sim::Mass>& masses, std::vector<KOL_sim::Spring>& springs) {
+         for(int i=0; i<5; ++i)
+            for(int j=0; j<5; ++j)
+                for(int k=1; k<6; ++k)
+                        masses.push_back(KOL_sim::Mass(j*0.2,i*0.2,k*0.2+3, 3, 0.07, RED));
+        for (int i=0; i < masses.size()-1; ++i)
+            for (int j = i + 1; j < masses.size(); ++j)
+                springs.push_back(KOL_sim::Spring(&masses[i], &masses[j], 10'000));
+
+    }
+    
+    void createPendulum(std::vector<KOL_sim::Mass>& masses, std::vector<KOL_sim::Spring>& springs) {
+        masses.push_back(KOL_sim::Mass(0.0,0,2, 1, 0.05, GREEN, true));
+        masses.push_back(KOL_sim::Mass(1.9,0,2,100, 0.12, RED));
+        
+        for (int i=0; i < masses.size()-1; ++i)
+            for (int j = i + 1; j < masses.size(); ++j)
+                springs.push_back(KOL_sim::Spring(&masses[i], &masses[j], 1'000'000));
+        
+    }
+
+    
+    void createCube(std::vector<KOL_sim::Mass>& masses, std::vector<KOL_sim::Spring>& springs) {
+        // back 4
+        masses.push_back(KOL_sim::Mass(0,0,2, 1, 0.10, RED));
+        masses.push_back(KOL_sim::Mass(0,0,3, 1, 0.10, RED));
+        masses.push_back(KOL_sim::Mass(1,0,2, 1, 0.10, RED));
+        masses.push_back(KOL_sim::Mass(1,0,3, 1, 0.10, RED));
+        // front 4
+        masses.push_back(KOL_sim::Mass(0,1,2, 1, 0.10, RED));
+        masses.push_back(KOL_sim::Mass(0,1,3, 1, 0.10, RED));
+        masses.push_back(KOL_sim::Mass(1,1,2, 1, 0.10, RED));
+        masses.push_back(KOL_sim::Mass(1,1,3, 1, 0.10, RED));
+        
+        for (int i=0; i < masses.size()-1; ++i)
+            for (int j = i + 1; j < masses.size(); ++j)
+                springs.push_back(KOL_sim::Spring(&masses[i], &masses[j], 10'000));
+    }
+
+    void createTetrahidron(std::vector<KOL_sim::Mass>& masses, std::vector<KOL_sim::Spring>& springs) {
+        // C (0.5, 0.29, 0.82)  A = (1,0,0), O (0,0,0), B (0.5, 0.87, 0)
+        masses.push_back(KOL_sim::Mass(0,0,1, 0.8));
+        masses.push_back(KOL_sim::Mass(3,0,1, 0.8));
+        masses.push_back(KOL_sim::Mass(0.5*3,0.87*3,1, 0.8));
+        masses.push_back(KOL_sim::Mass(0.5*3,0.29*3,0.82*2+1, 0.8));
+        
+        for (int i=0; i < masses.size()-1; ++i)
+            for (int j = i + 1; j < masses.size(); ++j)
+                springs.push_back(KOL_sim::Spring(&masses[i], &masses[j], 10'000));
+        
+    }
+    
+
+}
 
 
 
-// GRAPHICS Global variables: a camera, a checkerboard and some balls.
-//KOL_sim::Checkerboard checkerboard(8, 8);
-//KOL_sim::Camera camera;
-//std::vector<KOL_sim::Ball> balls;
-//
-//
-//KOL_sim::Graphics drawings = KOL_sim::Graphics(camera);
 
 
 
 
 
-
-
-
-
-//END GRAPHICS
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-//Simulate returns a vector of vectors. Index is the mass#.
-
-
-//Open all the files for every ball,
-//At every call to display, read the next line and return the postition
-
-
-void makeLattice(std::vector<KOL_sim::Mass>& , std::vector<KOL_sim::Spring>&, bool = true);
 
 int main(int argc, char** argv)
 {
+    // create the simulation object
     KOL_sim::Simulation sim = KOL_sim::Simulation(T, DT);
 
+    //masses and spring vectors to store object structure
     std::vector<KOL_sim::Mass> masses;
     std::vector<KOL_sim::Spring> springs;
-
-
-    //Pendulum
-    masses.push_back(KOL_sim::Mass(0.0,0,2, 1, 0.05, GREEN, true));
-    masses.push_back(KOL_sim::Mass(1.9,0,2,100, 0.12, RED));
-//    makeLattice(masses, springs, true);
-    for (int i=0; i < masses.size()-1; ++i)
-        for (int j = i + 1; j < masses.size(); ++j)
-            springs.push_back(KOL_sim::Spring(&masses[i], &masses[j], 100'000));
-
-    sim.simulate(springs, masses, argc, argv); //outputs position into a file.
-    sim.start(argc, argv);
+    
+    //make an object
+    ObjectExamples::createPendulum(masses,springs);
+    
+    //run
+    sim.simulate(springs, masses); // run headless
+    sim.start(argc, argv);         // run for visualization
     return 0;
 
 }
@@ -74,59 +105,6 @@ int main(int argc, char** argv)
 
 
 
-//    masses.push_back(KOL_sim::Mass(0,0,1, 0.8));
-//    masses.push_back(KOL_sim::Mass(3,0,1, 0.8));
-//
-//    masses.push_back(KOL_sim::Mass(0.5*3,0.87*3,1, 0.8));
-//    masses.push_back(KOL_sim::Mass(0.5*3,0.29*3,0.82*3+1, 0.8));
-
-// CUBE
-//     back 4
-//    masses.push_back(KOL_sim::Mass(0,0,0, 1, 0.05, RED));
-//    masses.push_back(KOL_sim::Mass(0,0,1, 1, 0.05, RED));
-//
-//    masses.push_back(KOL_sim::Mass(1,0,0, 1, 0.05, RED));
-//    masses.push_back(KOL_sim::Mass(1,0,1, 1, 0.05, RED));
-//    // front 4
-//    masses.push_back(KOL_sim::Mass(0,1,0, 1, 0.05, RED));
-//    masses.push_back(KOL_sim::Mass(0,1,1, 1, 0.05, RED));
-//
-//    masses.push_back(KOL_sim::Mass(1,1,0, 1, 0.05, RED));
-//    masses.push_back(KOL_sim::Mass(1,1,1, 1, 0.05, RED));
-
-
-
-// Tetrahidron
-    // C (0.5, 0.29, 0.82)  A = (1,0,0), O (0,0,0), B (0.5, 0.87, 0)
-//        masses.push_back(KOL_sim::Mass(0,0,1, 0.8));
-//        masses.push_back(KOL_sim::Mass(3,0,1, 0.8));
-//
-//        masses.push_back(KOL_sim::Mass(0.5*3,0.87*3,1, 0.8));
-//        masses.push_back(KOL_sim::Mass(0.5*3,0.29*3,0.82*2+1, 0.8));
-
-//Pendulum
-//            masses.push_back(KOL_sim::Mass(0.0,0,2, 1, 0.05, GREEN, true));
-//            masses.push_back(KOL_sim::Mass(1.9,0,2,100, 0.12, RED));
-
-
-
-
-void makeLattice(std::vector<KOL_sim::Mass>& masses, std::vector<KOL_sim::Spring>& springs, bool c) {
- 
-    // Lattice
-    //    int coloring =0;
-        for(int i=0; i<5; ++i) {
-            for(int j=0; j<5; ++j) {
-                for(int k=1; k<6; ++k) {
-    //                if (coloring % 2 == 0)
-                        masses.push_back(KOL_sim::Mass(j*0.2,i*0.2,k*0.2+3, 3, 0.07, RED));
-    //                else
-    //                    masses.push_back(KOL_sim::Mass(j*0.2,i*0.2,k*0.2+3, 1, 0.07, GREEN));
-    //                coloring++;
-                }
-            }
-        }
-}
 
 
 
@@ -146,7 +124,10 @@ void makeLattice(std::vector<KOL_sim::Mass>& masses, std::vector<KOL_sim::Spring
 
 
 
-void CreateLattice(const std::vector<double> & center, const std::vector<double> & dims, int nx, int ny, int nz, std::vector<KOL_sim::Mass> masses, std::vector<KOL_sim::Spring> springs) {
+
+
+
+void CreateLattice(const std::vector<double> & center, const std::vector<double> & dims, int nx, int ny, int nz, std::vector<KOL_sim::Mass>& masses, std::vector<KOL_sim::Spring>& springs) {
 
 
     for (int i = 0; i < nx; i++) {
