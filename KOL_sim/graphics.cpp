@@ -6,7 +6,7 @@
 //
 
 #include "graphics.hpp"
-
+#include <iostream>
 //graphics
 //#ifdef __APPLE__
 //#define GL_SILENCE_DEPRECATION
@@ -47,8 +47,24 @@ void Ball::update(double new_x, double new_y, double new_z) {
     glPopMatrix();
 }
 
+/**********************************************************************************************************
+        BALL CLASS
+ ******************************************************************************************************/
 
-
+void Line::update(double x_1, double h_1, double z_1, double x_2, double h_2, double z_2) {
+    std::cout << x_1;
+    x1 = x_1 + 0.000000001;
+    y1 = h_1;
+    z2 = z_1;
+    x2 = x_2;
+    y2 = h_2;
+    z2 = z_2;
+    glLineWidth(0.02);
+    glBegin(GL_LINE_LOOP);
+    glVertex3f(x1, z1, y1);
+    glVertex3f(x2, z2, y2);
+    glEnd();
+}
 /**********************************************************************************************************
         CHECKERBOARD CLASS
  ******************************************************************************************************/
@@ -91,6 +107,7 @@ Camera* Graphics::camera;
 Graphics::Graphics(Camera *cam) {
 
     camera = cam;
+    
 }
 
 void Graphics::init(Checkerboard &checkerboard) {
@@ -105,21 +122,22 @@ void Graphics::init(Checkerboard &checkerboard) {
     checkerboard.create();
 }
 
+
 void Graphics::reshape(GLint w, GLint h) {
- glViewport(0, 0, w, h);
- glMatrixMode(GL_PROJECTION);
- glLoadIdentity();
- gluPerspective(40.0, GLfloat(w) / GLfloat(h), 1.0, 150.0);
- glMatrixMode(GL_MODELVIEW);
+    glViewport(0, 0, w, h);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluPerspective(40.0, GLfloat(w) / GLfloat(h), 1.0, 150.0);
+    glMatrixMode(GL_MODELVIEW);
 }
 
 void Graphics::special(int key, int, int) {
-  switch (key) {
-    case GLUT_KEY_LEFT: camera->moveLeft(); break;
-    case GLUT_KEY_RIGHT: camera->moveRight(); break;
-    case GLUT_KEY_UP: camera->moveUp(); break;
-    case GLUT_KEY_DOWN: camera->moveDown(); break;
-  }
+    switch (key) {
+        case GLUT_KEY_LEFT: camera->moveLeft(); break;
+        case GLUT_KEY_RIGHT: camera->moveRight(); break;
+        case GLUT_KEY_UP: camera->moveUp(); break;
+        case GLUT_KEY_DOWN: camera->moveDown(); break;
+    }
   glutPostRedisplay();
 }
 
@@ -136,8 +154,8 @@ void Graphics::key(unsigned char key, int x, int y) {
 }
 
 void Graphics::timer(int v) {
-  glutPostRedisplay();
-  glutTimerFunc(1000/6000, timer, v);
+    glutPostRedisplay();
+    glutTimerFunc(1000/6000, timer, v);
 }
 
 
