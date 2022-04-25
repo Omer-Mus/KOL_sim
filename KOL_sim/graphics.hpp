@@ -68,6 +68,28 @@ public:
 };
 
 
+// A line.
+class Line {
+    GLfloat* color;
+    double x1, y1, z1, x2, y2, z2;
+    int direction;
+    
+    friend class Simulation;
+    friend class Mass;
+    friend class Spring;
+    
+public:
+    int ID;
+    Line(int i, double x_1, double h_1, double z_1, double x_2, double h_2, double z_2): ID(i), y1(h_1), x1(x_1),                                                                             z1(z_1), y2(h_2), x2(x_2), z2(z_2)
+    {
+        GLfloat def[] = {1,0,0};
+        color = def;
+        
+    }
+    void update(double x_1, double h_1, double z_1, double x_2, double h_2, double z_2);
+    
+};
+
 // A checkerboard.
 class Checkerboard {
     int displayListId;
@@ -93,7 +115,7 @@ class Graphics {
     friend class Mass;
     friend class Spring;
 public:
-    Graphics(Camera* cam);
+    Graphics(Camera *cam);
     // Application-specific initialization: Set up global lighting parameters
     // and create display lists.
     void init(Checkerboard &checkerboard);
@@ -110,7 +132,6 @@ public:
 
     static void key(unsigned char key, int x, int y);
 
-    
 };
 
 } //namespace KOL_sim
