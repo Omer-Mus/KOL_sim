@@ -28,16 +28,16 @@ class Spring {
     Mass* m2;
     double _omega; // frequency of oscillation
     double _damping; // damping on the masse
+    bool actuateSpr; //allow actuation
     friend class Simulation;
 
 public:
 
     Spring(){};
     
-    Spring(Mass* m1, Mass* m2, double K_c = 1000) : m1(m1), m2(m2), K(K_c) {
-//        this->m1 = m1;
-//        this->m2 = m2;
-//        this->K = K_c;
+    Spring(Mass* m1, Mass* m2, double K_c = 1000, bool actuate = false)
+    : m1(m1), m2(m2), K(K_c), actuateSpr(actuate)
+    {
         this->L0 = sqrt(pow(this->m1->p[0] - this->m2->p[0], 2) + pow(this->m1->p[1] - this->m2->p[1], 2) + pow(this->m1->p[2] - this->m2->p[2], 2));
         defLength=L0;
     }
@@ -50,9 +50,6 @@ public:
     }
     
     double springForce() {
-//        std::cout << m1.p[0] << " " <<  m2.p[0] << "\n";
-//        std::cout << m1.p[1] << " " <<  m2.p[1] << "\n";
-//        std::cout << m1.p[2] << " " << m2.p[2] << "\n\n";
         double powers = pow(this->m1->p[0] - this->m2->p[0], 2) + pow(this->m1->p[1] - this->m2->p[1], 2) + pow(this->m1->p[2] - this->m2->p[2], 2);
 //        std::cout << powers << "\n";
 
