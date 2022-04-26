@@ -2,16 +2,11 @@
 //  graphics.cpp
 //  KOL_sim
 //
-//  Created by King on 4/20/22.
+//  Created by Omer Mustel on 4/20/22.
 //
 
 #include "graphics.hpp"
 #include <iostream>
-//graphics
-//#ifdef __APPLE__
-//#define GL_SILENCE_DEPRECATION
-//#include <GLUT/glut.h>
-//#endif
 
 namespace KOL_sim {
 
@@ -52,18 +47,15 @@ void Ball::update(double new_x, double new_y, double new_z) {
  ******************************************************************************************************/
 
 void Line::update(double x_1, double h_1, double z_1, double x_2, double h_2, double z_2) {
-    std::cout << x_1;
-    x1 = x_1 + 0.000000001;
+    x1 = x_1;
     y1 = h_1;
     z2 = z_1;
     x2 = x_2;
     y2 = h_2;
     z2 = z_2;
     glLineWidth(0.02);
-    glBegin(GL_LINE_LOOP);
     glVertex3f(x1, z1, y1);
     glVertex3f(x2, z2, y2);
-    glEnd();
 }
 /**********************************************************************************************************
         CHECKERBOARD CLASS
