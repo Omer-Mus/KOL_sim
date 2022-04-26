@@ -28,7 +28,7 @@ class Spring {
     Mass* m2;
     double _omega; // frequency of oscillation
     double _damping; // damping on the masse
-    bool actuateSpr; //allow actuation
+    bool actuate_spr; //allow actuation
     friend class Simulation;
 
 public:
@@ -36,7 +36,7 @@ public:
     Spring(){};
     
     Spring(Mass* m1, Mass* m2, double K_c = 1000, bool actuate = false)
-    : m1(m1), m2(m2), K(K_c), actuateSpr(actuate)
+    : m1(m1), m2(m2), K(K_c), actuate_spr(actuate)
     {
         this->L0 = sqrt(pow(this->m1->p[0] - this->m2->p[0], 2) + pow(this->m1->p[1] - this->m2->p[1], 2) + pow(this->m1->p[2] - this->m2->p[2], 2));
         defLength=L0;
@@ -49,7 +49,7 @@ public:
         this->L0 = S.L0;
     }
     
-    double springForce() {
+    double spring_force() {
         double powers = pow(this->m1->p[0] - this->m2->p[0], 2) + pow(this->m1->p[1] - this->m2->p[1], 2) + pow(this->m1->p[2] - this->m2->p[2], 2);
 //        std::cout << powers << "\n";
 
@@ -60,17 +60,17 @@ public:
     }
     
     
-    void actuateSpring(double theta) { L0 = defLength + sin(theta)*0.5; }
+    void actuate_spring(double theta) { L0 = defLength + sin(theta)*0.5; }
+
+    void set_mass1(Mass * mass1) { m1 = mass1; }
+    void set_mass2(Mass * mass2) { m2 = mass2; }
+    Mass * get_mass1() { return m1; }
+    Mass * get_mass2() { return m2; }
     
-    void setMass1(Mass * mass1) { m1 = mass1; }
-    void setMass2(Mass * mass2) { m2 = mass2; }
+    void modify_spring_constant(double constant) { K = constant; }
     
-    Mass getMass1() { return * m1; }
-    Mass getMass2() { return * m2; }
-    
-    void modifySpringConstant(double constant) { K = constant; }
-    
-    void setRestLength(double L) { L0 = L; }
+    void set_rest_length(double L) { L0 = L; }
+    double get_rest_length() { return L0; }
     ~Spring() {}
 
 };
