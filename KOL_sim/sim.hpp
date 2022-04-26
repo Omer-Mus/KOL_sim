@@ -22,14 +22,14 @@ namespace KOL_sim {
 
 
 class Simulation {
-    
+    bool externalFroces=false;
     std::vector<double> GRAVITY = {0,0,-9.81};
     double lim;
     double T;
     double DT;
     double damping = 1;
     void time_inc() { this->T += this->DT; }
-    
+    std::vector<double> externalFrocesSim;
     double friction_s;
     double friction_k;
     double myu;
@@ -68,11 +68,12 @@ class Simulation {
     inline static int  iter_lines = 0;
     inline static Checkerboard checkerboard;
     inline static std::vector<Ball> balls;
-    inline static std::vector<Line> lines;
+    inline static std::vector<std::vector<std::vector<double>>> lineVers;
+//    inline static std::vector<Line> lines;
     inline static std::vector<std::vector<std::vector<double>>> massPositions;
     
     inline static void display() {
-        
+        std::vector<std::vector<double>> lines;
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glLoadIdentity();
         gluLookAt(camera.getX(), camera.getY(), camera.getZ(),
@@ -83,7 +84,7 @@ class Simulation {
 
         //read in the data
         if (iter >= balls.size()) iter = 0;
-        if (iter_lines >= lines.size()) iter_lines = 0;
+//        if (iter_lines >= lines.size()) iter_lines = 0;
         for (auto& pos : massPositions) {
             if (loop == massPositions[0].size()) {
                 std::cout << "KOL_sim::END_OF_SIMULATION\nKOL_sim::RESTARTING (Press q to exit)\n";
@@ -94,26 +95,10 @@ class Simulation {
 
             if (!(loop >= pos.size()))
                 balls[iter++].update(pos[loop][0], pos[loop][2], pos[loop][1]);
+            
 
         }
         
-//        for(int i=0; i<massPositions.size(); ++i) {
-//            if (loop == massPositions[0].size()) {
-//                std::cout << "KOL_sim::END_OF_SIMULATION\nKOL_sim::RESTARTING (Press q to exit)\n";
-//                loop=0;
-//                iter=0;
-//                iter_lines = 0;
-//            }
-//            if (!(loop >= massPositions[i].size()))
-//                balls[iter++].update(massPositions[i][loop][0], massPositions[i][loop][2], massPositions[i][loop][1]);
-//            if (!(i + 2 >= massPositions.size())) {
-//                std::cout << massPositions[i][loop][0] << " massPositions[i][loop][0]\n";
-//                lines[iter_lines++].update(massPositions[i][loop][0], massPositions[i][loop][2], massPositions[i][loop][1],
-//                                           massPositions[i+2][loop][0], massPositions[i+1][loop][2], massPositions[i+1][loop][1]);
-//            }
-//
-//        }
-
         loop+=1;
         glFlush();
         glutSwapBuffers();
@@ -127,8 +112,14 @@ class Simulation {
     
     
 public:
-    double getT() {return lim;}
-    double getDT() {return DT;}
+    double get_T() {return lim;}
+    double get_DT() {return DT;}
+    void enable_external_forces(std::vector<double> FORCE){
+        externalFroces = true;
+        externalFrocesSim = FORCE;
+        
+    };
+    void set_gravity(std::vector<double> vec) { GRAVITY = vec;}
     
     //GLUT wrapper
     void start(int &argc, char** argv) {
@@ -151,7 +142,7 @@ public:
     Simulation(double time, double time_d, std::vector<double> normal={0,0,1}, bool f=true) :
     lim(time), DT(time_d), fric(f) {}
     
-    std::vector<std::vector<std::vector<double>>> simulate(std::vector<Spring> springs, std::vector<Mass> &masses)
+    std::vector<std::vector<std::vector<double>>> simulate(std::vector<Spring>& springs, std::vector<Mass> &masses)
     {
 
         int c=0;
@@ -166,7 +157,7 @@ public:
             massPositions.push_back(posVec);
         }
         
-        int i = 0, i2=0;
+        int i = 0;
         for (auto& m : masses)
             balls.push_back(KOL_sim::Ball(++i, m.radius, m.color, m.position()[0], m.position()[2], m.position()[1]));
         
@@ -179,7 +170,10 @@ public:
             **************************************************/
             //compute the F forces
             for (auto& m : masses) {
-
+                
+                if(this->externalFroces) {
+                    m.add_external_force(externalFrocesSim);
+                }
                 std::vector<double> temp1;
 
                 for (int i=0; i<3; ++i)
@@ -207,10 +201,10 @@ public:
             //iterate over the springs
             for (auto& s : springs) {
 
-                if (s.actuateSpr) //actuate springs
-                    s.actuateSpring(T);
+                if (s.actuate_spr) //actuate springs
+                    s.actuate_spring(T);
 
-                double f = s.springForce();
+                double f = s.spring_force();
                 std::vector<double> temp;
                 double magnitude = 0;
                 for (int i=0; i<3; i++) {
@@ -237,7 +231,7 @@ public:
             for (auto& m : masses) {
 
                 m.update_acceleration();
-                m.update_velocity(DT, damping);
+                m.update_velocity(DT);
                 m.update_position(DT);
 
                 if (c == 50) {
@@ -265,20 +259,101 @@ public:
             }
             for (auto& m : masses)
                 balls.push_back(Ball(++i, m.radius, m.color, m.position()[0], m.position()[2], m.position()[1]));
-            
-            // lines vertecis
-//             for (int k=0; k < masses.size()-1; ++k)
-//                 for (int j = k + 1; j < masses.size(); ++j)
-//                    lines.push_back(Line(++i2, masses[k].position()[0], masses[k].position()[2], masses[k].position()[1], masses[j].position()[0], masses[j].position()[2], masses[j].position()[1]));
-
         
         }  // end Simulation Loop
+        
         return massPositions;
         
     }
 
 
 };
+
+
+
+
+
+
+
+namespace Object_Examples {
+    GLfloat WHITE[] = {1, 1, 1};
+    GLfloat RED[] = {1, 0, 0};
+    GLfloat GREEN[] = {0, 1, 0};
+    GLfloat MAGENTA[] = {1, 0, 1};
+    GLfloat BLACK[] = {0, 0, 0};
+
+    void create_lattice(std::vector<KOL_sim::Mass>& masses, std::vector<KOL_sim::Spring>& springs) {
+         for(int i=0; i<4; ++i)
+            for(int j=0; j<4; ++j)
+                for(int k=1; k<4; ++k)
+                        masses.push_back(KOL_sim::Mass(j*0.3,i*0.3,k*0.3+2, 3, 0.10, RED));
+        for (int i=0; i < masses.size()-1; ++i)
+            for (int j = i + 1; j < masses.size(); ++j)
+                springs.push_back(KOL_sim::Spring(&masses[i], &masses[j], 2000));
+
+    }
+    
+    void create_pendulum(std::vector<KOL_sim::Mass>& masses, std::vector<KOL_sim::Spring>& springs) {
+        masses.push_back(KOL_sim::Mass(0.0,0,2, 1, 0.05, GREEN, true));
+        masses.push_back(KOL_sim::Mass(1.9,0,2,100, 0.12, RED));
+        
+        for (int i=0; i < masses.size()-1; ++i)
+            for (int j = i + 1; j < masses.size(); ++j)
+                springs.push_back(KOL_sim::Spring(&masses[i], &masses[j], 1'000'000));
+        
+    }
+
+    
+    void create_cube(std::vector<KOL_sim::Mass>& masses, std::vector<KOL_sim::Spring>& springs) {
+        // back 4
+        masses.push_back(KOL_sim::Mass(0,0,2, 1, 0.10, RED));
+        masses.push_back(KOL_sim::Mass(0,0,3, 1, 0.10, RED));
+        masses.push_back(KOL_sim::Mass(1,0,2, 1, 0.10, RED));
+        masses.push_back(KOL_sim::Mass(1,0,3, 1, 0.10, RED));
+        
+        // front 4
+        masses.push_back(KOL_sim::Mass(0,1,2, 1, 0.10, RED));
+        masses.push_back(KOL_sim::Mass(0,1,3, 1, 0.10, RED));
+        masses.push_back(KOL_sim::Mass(1,1,2, 1, 0.10, RED));
+        masses.push_back(KOL_sim::Mass(1,1,3, 1, 0.10, RED));
+        
+        for (int i=0; i < masses.size()-1; ++i)
+            for (int j = i + 1; j < masses.size(); ++j)
+                springs.push_back(KOL_sim::Spring(&masses[i], &masses[j], 10'000));
+    }
+
+    void create_actuated_cube(std::vector<KOL_sim::Mass>& masses, std::vector<KOL_sim::Spring>& springs) {
+        // back 4
+        masses.push_back(KOL_sim::Mass(0,0,0, 1, 0.10, RED));
+        masses.push_back(KOL_sim::Mass(0,0,1, 1, 0.10, RED));
+        masses.push_back(KOL_sim::Mass(1,0,0, 1, 0.10, RED));
+        masses.push_back(KOL_sim::Mass(1,0,1, 1, 0.10, RED));
+        
+        // front 4
+        masses.push_back(KOL_sim::Mass(0,1,0, 1, 0.10, RED));
+        masses.push_back(KOL_sim::Mass(0,1,1, 1, 0.10, RED));
+        masses.push_back(KOL_sim::Mass(1,1,0, 1, 0.10, RED));
+        masses.push_back(KOL_sim::Mass(1,1,1, 1, 0.10, RED));
+        
+        for (int i=0; i < masses.size()-1; ++i)
+            for (int j = i + 1; j < masses.size(); ++j)
+                springs.push_back(KOL_sim::Spring(&masses[i], &masses[j], 10'000, true));
+    }
+
+
+    void create_tetrahidron(std::vector<KOL_sim::Mass>& masses, std::vector<KOL_sim::Spring>& springs, bool b=false) {
+        // C (0.5, 0.29, 0.82)  A = (1,0,0), O (0,0,0), B (0.5, 0.87, 0)
+        masses.push_back(KOL_sim::Mass(0,0,0, 0.8, 0.09));
+        masses.push_back(KOL_sim::Mass(1,0,0, 0.8, 0.09));
+        masses.push_back(KOL_sim::Mass(0.05*3,0.87*3/5,0, 0.8, 0.09));
+        masses.push_back(KOL_sim::Mass(0.15*3,0.29*3/5,0.82, 0.8, 0.09));
+        
+        for (int i=0; i < masses.size()-1; ++i)
+            for (int j = i + 1; j < masses.size(); ++j)
+                springs.push_back(KOL_sim::Spring(&masses[i], &masses[j], 100'000, b));
+    }
+}
+
 
 
 } //namespace KOL_sim
