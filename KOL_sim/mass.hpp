@@ -11,12 +11,8 @@
 #include <vector>
 #include <cmath>
 #include <iostream>
-
 #include "graphics.hpp"
-//#ifdef __APPLE__
-//#define GL_SILENCE_DEPRECATION
-//#include <GLUT/glut.h>
-//#endif
+
 
 namespace KOL_sim {
 
@@ -83,11 +79,10 @@ public:
     }
 
     // update velocity
-    void update_velocity(const double DT, double damping) {
+    void update_velocity(const double DT) {
         if (!fixed) {
             for (int i = 0; i < 3; i++ ) {
                 this->v[i] = this->v[i] + DT * this->a[i];
-                this->v[i] *= damping;
             }
         }
     }
@@ -115,18 +110,22 @@ public:
         }
     }
     
-    void setExternalForce(const std::vector<double> & v) { if (!fixed) F = v; }
+    void set_external_force(const std::vector<double> & v) { if (!fixed) F = v; }
     
+    void add_external_force(const std::vector<double> & v) {
+        if (!fixed){
+            F[0] += v[0];
+            F[1] += v[1];
+            F[2] += v[2];
+        }
+    }
     
-    void setDrag(double C) {  F[0] *= C;  F[1] *= C; F[2] *= C; };
-
+    void set_drag(double C) {  F[0] *= -C;  F[1] *= -C; F[2] *= -C; }
+    
     std::vector<double> position() { return p; }
-    
-    float Radius() { return radius; }
-    
+        
     void print() {
         std::cout << "Mass " << m << "\n";
-
         for(auto& f : p)
             std::cout << "position: " << f << "\n";
         for(auto& f : v)
