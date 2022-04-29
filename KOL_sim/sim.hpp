@@ -127,7 +127,7 @@ public:
         glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
         glutInitWindowPosition(80, 80);
         glutInitWindowSize(800, 600);
-        glutCreateWindow("Bouncing Balls");
+        glutCreateWindow("KOL_sim Window");
         glutDisplayFunc(display);
         glutReshapeFunc(drawings.reshape);
         glutSpecialFunc(drawings.special);
